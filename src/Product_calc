@@ -1,0 +1,133 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class CalorieCalculator {
+    // Путь к CSV-файлу с данными о продуктах
+    private static final String CSV_FILE_PATH = "path/to/products.csv";
+
+    public static void main(String[] args) {
+        // Считываем продукты из CSV-файла
+        List<Product> productList = readProductsFromCSV();
+
+        // Инициализируем Scanner для ввода пользователя
+        Scanner scanner = new Scanner(System.in);
+
+        // Запрашиваем у пользователя ввод названия продукта
+        System.out.print("Введите продукт (например, MILK): ");
+        String userInput = scanner.nextLine().toUpperCase();
+
+        // Находим соответствующие продукты
+        List<Product> matchingProducts = findMatchingProducts(userInput, productList);
+
+        // Обрабатываем результат
+        if (matchingProducts.isEmpty()) {
+            System.out.println("Продукты не найдены.");
+        } else {
+            // Выводим список соответствующих продуктов и предлагаем пользователю выбрать один из них
+            System.out.println("Выберите продукт:");
+
+            for (int i = 0; i < matchingProducts.size(); i++) {
+                System.out.println((i + 1) + ". " + matchingProducts.get(i).getType());
+            }
+
+            // Запрашиваем у пользователя ввод номера продукта
+            System.out.print("Введите номер продукта: ");
+            int selectedProductIndex = scanner.nextInt();
+
+            // Проверяем корректность ввода и выводим информацию о выбранном продукте
+            if (selectedProductIndex > 0 && selectedProductIndex <= matchingProducts.size()) {
+                Product selectedProduct = matchingProducts.get(selectedProductIndex - 1);
+                System.out.println("Выбранный продукт: " + selectedProduct.getType());
+                // Здесь можно продолжить обработку выбранного продукта
+            } else {
+                System.out.println("Некорректный номер продукта.");
+            }
+        }
+    }
+
+    // Метод для считывания продуктов из CSV-файла
+    private static List<Product> readProductsFromCSV() {
+        List<Product> productList = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE_PATH))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 6) {
+                    String productName = data[0].toUpperCase();
+                    String type = data[1];
+                    double calories = Double.parseDouble(data[2]);
+                    double protein = Double.parseDouble(data[3]);
+                    double fat = Double.parseDouble(data[4]);
+                    double carbohydrates = Double.parseDouble(data[5]);
+
+                    productList.add(new Product(productName, type, calories, protein, fat, carbohydrates));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return productList;
+    }
+
+    // Метод для поиска соответствующих продуктов
+    private static List<Product> findMatchingProducts(String productName, List<Product> productList) {
+        List<Product> matchingProducts = new ArrayList<>();
+        for (Product product : productList) {
+            if (product.getProductName().equals(productName)) {
+                matchingProducts.add(product);
+            }
+        }
+        return matchingProducts;
+    }
+}
+
+// Класс, представляющий продукт
+class Product {
+    private String productName;
+    private String type;
+    private double calories;
+    private double protein;
+    private double fat;
+    private double carbohydrates;
+
+    // Конструктор для инициализации полей продукта
+    public Product(String productName, String type, double calories, double protein, double fat, double carbohydrates) {
+        this.productName = productName;
+        this.type = type;
+        this.calories = calories;
+        this.protein = protein;
+        this.fat = fat;
+        this.carbohydrates = carbohydrates;
+    }
+
+    // Геттеры для получения значений полей
+    public String getProductName() {
+        return productName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public double getCalories() {
+        return calories;
+    }
+
+    public double getProtein() {
+        return protein;
+    }
+
+    public double getFat() {
+        return fat;
+    }
+
+    public double getCarbohydrates() {
+        return carbohydrates;
+    }
+}
